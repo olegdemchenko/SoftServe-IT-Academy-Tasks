@@ -15,9 +15,6 @@
   }
   
   function repeat(str = '', count = 1) {
-    if (typeof str !== 'string') {
-      throw new Error('First argument must be string');
-    }
     const isCountNotCorrect = !Number.isFinite(count) || count < 0 || str.length * count >= 1 << 28;
     if (isCountNotCorrect) {
       throw new Error('count is not correct');
@@ -25,7 +22,8 @@
     if (str === '' || count === 0) {
       return '';
     }
-    return Array(count).fill(str).join('');
+    const repeatedStr = Array(count).fill(str);
+    return createStr(repeatedStr, 0, count);
   }
   
   function normalizeIndex(maxLength, index, type) {
