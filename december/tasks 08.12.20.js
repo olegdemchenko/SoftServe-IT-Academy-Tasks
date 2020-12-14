@@ -31,32 +31,45 @@ function checkTikTacToe (field) {
     }
   }
 
-const testStr = 'Yesterday, we bumped into Laura. It had to happen, but you can\'t deny the timing couldn\'t be worse. The "mission" to try and seduce her was a complete failure last month. By the way, she still has the ring I gave her. Anyhow, it hasn\'t been a pleasurable experience to go through it. I wanted to feel done with it first.'
+const wordRegular = /\b[\w']+'?/;
 
-const wordRegular = /\b[\w'`]+\b/;
+const parseWords = (sentence) => {
+  const match = sentence.match(/\b[\w']+'?/g);
+  return match || [];
+};
 
-function getHiddenMessage (message) {
-    if (message === '') {
-      return '';
-    }
-    const [firstSentence, ...restSentences] = message.slice(0, message.length - 1).split(/[.!?]/g);
-    const wordsNumbs = firstSentence.trim().split(' ').map((word) => {
-      const match = word.match(wordRegular)[0];
-      if (/['`]/.test(match)) {
-        return match.length - 1;
-      }
-      return match.length;
-    });
-    
-    const hiddenWordsSources = restSentences.slice(0, wordsNumbs.length)
-      .map((sent) => sent.trim().split(' '))
-      .map((sent) => sent.map((word) => word.match(wordRegular)[0]));
-    const otherSentences = restSentences.slice(wordsNumbs.length);
-    const hiddenWords = wordsNumbs.reduce((acc, numb, index) => {
-        return [...acc, hiddenWordsSources[index][numb - 1]];
-      }, []);
-    const restMessage = getHiddenMessage(otherSentences.join('.'));
-    hiddenWords[0] = `${hiddenWords[0][0].toUpperCase()}${hiddenWords[0].slice(1)}`;
-    const space = restMessage !== '' ? ' ' : '';
-    return `${hiddenWords.join(' ')}.${space}${restMessage}`;
+const parseKeys = (words) => words.map((word) => word.replaceAll(/'/g, '')).map((word) => word.length);
+
+const makeSentence = (words) => words.map((word, index, words) => {
+  if (index === 0) {
+    return `${word[0].toUpperCase()}${word.slice(1)}`;
   }
+  const newWord = word.toLowerCase();
+  if (index === words.length - 1) {
+    return `${newWord}.`;
+  }
+  return newWord;
+}).join(' ');
+
+function getHiddenMessage(message) {
+  if (message.length === 0) {
+    return '';
+  }
+  const sentences = message.split(/[.!?]\s/g);
+  const keysSentence = sentences[0];
+  const keysWords = parseWords(keysSentence);
+  const keys = parseKeys(keysWords);
+  const sourceSentences = sentences.slice(1, keys.length + 1);
+  const restSentences = sentences.slice(keys.length + 1);
+  const sourceWords = sourceSentences.map((sentence) => parseWords(sentence));
+  const decodedWords = keys.reduce((acc, key, index) => {
+    if (sourceWords[index] && sourceWords[index][key - 1]) {
+      return [...acc, sourceWords[index][key - 1]];
+    }
+    return acc;
+  }, []);
+  const decodedSentence = makeSentence(decodedWords);
+  const restDecoded = getHiddenMessage(restSentences.join('. '));
+  const space = restDecoded.length === 0 ? '' : ' ';
+  return `${decodedSentence}${space}${restDecoded}`;
+}
