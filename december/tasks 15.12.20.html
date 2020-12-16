@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <div class="container">
+      <div class="message"></div>
+      <select name="spinners" id='spinnersBar'>
+        <option value="1">Spinner 1</option>
+        <option value="2">Spinner 2</option>
+        <option value="3">Spinner 3</option>
+        <option value="4">Spinner 4</option>
+        <option value="5">Spinner 5</option>
+        <option value="6">Spinner 6</option>
+        <option value="7">Spinner 7</option>
+        <option value="8">Spinner 8</option>
+        <option value="9">Spinner 9</option>
+        <option value="10">Spinner 10</option>
+      </select>
+      <div class="monitor"></div>
+    </div>
+    <script>
+      const getCookie = (name) => {
+        const cookies = document.cookie.split(/;\s?/).map((cookie) => cookie.trim().split(/\s?=\s?/));
+        return cookies.find(([cookieName]) => cookieName === name) || [];
+      };
+
+      const setCookie = (name, value) => {
+        document.cookie = `${name}=${value}; max-age=${3600 * 24 * 365 * 10}`;
+      }
+
+      const createMessage = (prevTime, currTime) => {
+        const diffTime = new Date(currTime - prevTime);
+        let phrase = 'Your last visit was';
+        const yearsLast = diffTime.getUTCFullYear() - 1970;
+        switch (true) {
+          case yearsLast > 0: {
+            phrase = `${phrase} ${yearsLast} years ago`;
+            break;
+          }
+          case diffTime.getUTCMonth() > 0: {
+            phrase = `${phrase} ${diffTime.getUTCMonth()} months ago`;
+            break;
+          }
+          case diffTime.getUTCDate() - 1 > 0: {
+            phrase = `${phrase} ${diffTime.getUTCDate() - 1} days ago`;
+            break;
+          }
+          case diffTime.getUTCHours() > 0: {
+            phrase = `${phrase} ${diffTime.getUTCHours()} hours ago`;
+            break;
+          }
+          case diffTime.getMinutes() > 0: {
+            phrase = `${phrase} ${diffTime.getMinutes()} minutes ago`;
+            break;
+          }
+          case diffTime.getSeconds() > 0: {
+            phrase = `${phrase} ${diffTime.getUTCMonth()} seconds ago`;
+            break;
+          }
+          default:
+            phrase = '';
+            break;
+        }
+        return phrase;
+      };
+
+      const messageField = document.querySelector('.message');
+      const spinnersBar = document.getElementById('spinnersBar');
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const lastVisited = getCookie('lastVisited');
+        if (lastVisited.length === 0) {
+          messageField.textContent = 'It is your first time';
+        } else {
+          const [, lastTime] = lastVisited;
+          const message = createMessage(lastTime, Date.now());
+          messageField.textContent = message;
+        }
+        setCookie('lastVisited', Date.now());
+      });
+
+      spinnersBar.addEventListener('change', (e) => {
+        const { value } = e.target;
+        setCookie('spinner', value); 
+      });
+      console.log(document.cookie);
+    </script>
+</body>
+</html>

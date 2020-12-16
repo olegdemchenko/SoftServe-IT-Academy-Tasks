@@ -3,8 +3,7 @@ const testField = [
     [2, 1, 2],
     [2, 1, 2],
   ]
-
-function checkTikTacToe (field) {
+ function checkTikTacToe (field) {
     const combinations = [...field];
     for (let i = 0; i < field.length; i += 1) {
       const column = field.reduce((acc, row) => [...acc, row[i]], []);
